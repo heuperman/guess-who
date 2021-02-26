@@ -1,17 +1,9 @@
 <script lang="ts">
-  import Router from "svelte-spa-router";
   import Game from "./game/Game.svelte";
-  import Home from "./Home.svelte";
-
-  const routes = {
-    "/": Home,
-    "/game/:id": Game,
-    "*": Home,
-  };
 </script>
 
 <main>
-  <Router {routes} />
+  <Game />
 </main>
 
 <style>

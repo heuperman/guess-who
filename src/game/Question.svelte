@@ -3,9 +3,8 @@
     emojis,
     storedCorrectQuestions,
     storedIncorrectQuestions,
+    storedTarget,
   } from "../stores";
-
-  export let id: string;
 
   const positions = ["first", "second", "third", "fourth"];
 
@@ -18,6 +17,9 @@
   let incorrectQuestions: number[][];
   storedIncorrectQuestions.subscribe((value) => (incorrectQuestions = value));
 
+  let target: number[];
+  storedTarget.subscribe((value) => (target = value));
+
   const createString = (incorrectQuestions: number[]) => {
     const questionEmojis = incorrectQuestions.map(
       (question) => emojis[question]
@@ -29,24 +31,17 @@
   };
 
   const submitQuestion = async () => {
-    const fetched = await fetch(`http://localhost:8000/question`, {
-      method: "POST",
-      body: JSON.stringify({
-        id,
-        index: selectedIndex,
-        feature: selectedEmojiIndex,
-      }),
-    });
-    const { question, result } = await fetched.json();
-
+    const result = target[selectedIndex] === selectedEmojiIndex;
     if (result) {
       storedCorrectQuestions.update((value) => {
-        value[question.index] = question.feature;
+        value[selectedIndex] = selectedEmojiIndex;
         return [...value];
       });
-    } else if (!incorrectQuestions[question.index].includes(question.feature)) {
+    } else if (
+      !incorrectQuestions[selectedIndex].includes(selectedEmojiIndex)
+    ) {
       storedIncorrectQuestions.update((value) => {
-        value[question.index].push(question.feature);
+        value[selectedIndex].push(selectedEmojiIndex);
         return [...value];
       });
     }

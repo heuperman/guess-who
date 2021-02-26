@@ -6,9 +6,8 @@
     storedCorrectQuestions,
     storedIncorrectGuesses,
     storedIncorrectQuestions,
+    storedTarget,
   } from "../stores";
-
-  export let id: string;
 
   let selectedIndex: number;
   let characters: number[][];
@@ -23,6 +22,9 @@
 
   let correctQuestions: number[];
   storedCorrectQuestions.subscribe((value) => (correctQuestions = value));
+
+  let target: number[];
+  storedTarget.subscribe((value) => (target = value));
 
   $: possibleCharacters = characters.filter((character) =>
     isPossible(
@@ -92,15 +94,11 @@
   };
 
   const submitGuess = async () => {
-    const fetched = await fetch(`http://localhost:8000/guess`, {
-      method: "POST",
-      body: JSON.stringify({ character: selectedCharacter, id }),
-    });
-    const { guess, result } = await fetched.json();
+    const result = isMatch(target, selectedCharacter);
     if (result) {
-      storedCorrectGuess.update(() => guess);
+      storedCorrectGuess.update(() => selectedCharacter);
     } else {
-      storedIncorrectGuesses.update((value) => [...value, guess]);
+      storedIncorrectGuesses.update((value) => [...value, selectedCharacter]);
     }
   };
 </script>
