@@ -5,9 +5,6 @@
   import Question from "./Question.svelte";
   import Guess from "./Guess.svelte";
 
-  export let params: { id: string };
-  const id = params?.id;
-
   const generateOptions = () => {
     const options: number[][] = [];
     const features = [0, 1, 2];
