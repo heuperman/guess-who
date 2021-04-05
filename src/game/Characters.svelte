@@ -98,7 +98,8 @@
     border-radius: 3px;
     height: 160px;
     width: 120px;
-    background-color: rgba(173, 173, 173, 0.2);
-    backdrop-filter: blur(2px);
+    background-color: rgba(173, 173, 173, 0.4);
+    backdrop-filter: blur(3px);
+    z-index: 2;
   }
 </style>

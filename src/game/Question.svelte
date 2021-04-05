@@ -1,15 +1,20 @@
 <script lang="ts">
   import {
-    emojis,
     storedCorrectQuestions,
     storedIncorrectQuestions,
     storedTarget,
   } from "../stores";
 
-  const positions = ["first", "second", "third", "fourth"];
+  const features = ["head", "colour", "hair", "expression"];
+  const types = [
+    ["a square", "a triangle", "a circle"],
+    ["orange", "purple", "green"],
+    ["curly", "spiky", "long"],
+    ["angry", "worried", "happy"],
+  ];
 
-  let selectedIndex: number;
-  let selectedEmojiIndex: number;
+  let selectedFeature: number;
+  let selectedType: number;
 
   let correctQuestions: number[];
   storedCorrectQuestions.subscribe((value) => (correctQuestions = value));
@@ -20,28 +25,26 @@
   let target: number[];
   storedTarget.subscribe((value) => (target = value));
 
-  const createString = (incorrectQuestions: number[]) => {
-    const questionEmojis = incorrectQuestions.map(
-      (question) => emojis[question]
+  const createString = (feature: number, incorrectQuestions: number[]) => {
+    const questionTypes = incorrectQuestions.map(
+      (question) => types[feature][question]
     );
 
-    return questionEmojis.length > 1
-      ? questionEmojis.join(" or ")
-      : questionEmojis[0];
+    return questionTypes.length > 1
+      ? questionTypes.join(" or ")
+      : questionTypes[0];
   };
 
   const submitQuestion = async () => {
-    const result = target[selectedIndex] === selectedEmojiIndex;
+    const result = target[selectedFeature] === selectedType;
     if (result) {
       storedCorrectQuestions.update((value) => {
-        value[selectedIndex] = selectedEmojiIndex;
+        value[selectedFeature] = selectedType;
         return [...value];
       });
-    } else if (
-      !incorrectQuestions[selectedIndex].includes(selectedEmojiIndex)
-    ) {
+    } else if (!incorrectQuestions[selectedFeature].includes(selectedType)) {
       storedIncorrectQuestions.update((value) => {
-        value[selectedIndex].push(selectedEmojiIndex);
+        value[selectedFeature].push(selectedType);
         return [...value];
       });
     }
@@ -51,22 +54,23 @@
 <div class="wrapper">
   <form on:submit|preventDefault={submitQuestion}>
     <div>
-      Is the
-      <select bind:value={selectedIndex}>
-        {#each positions as position, index}
+      Is their
+      <select bind:value={selectedFeature}>
+        {#each features as feature, index}
           <option value={index}>
-            {position}
+            {feature}
           </option>
         {/each}
       </select>
-      position the emoji
-      <select bind:value={selectedEmojiIndex}>
-        {#each emojis as emoji, index}
-          <option value={index}>
-            {emoji}
-          </option>
-        {/each}
-      </select>
+      {#if selectedFeature >= 0}
+        <select bind:value={selectedType}>
+          {#each types[selectedFeature] as type, index}
+            <option value={index}>
+              {type}
+            </option>
+          {/each}
+        </select>
+      {/if}
       ?
     </div>
     <button type="submit"> Ask </button>
@@ -76,15 +80,16 @@
     {#each [0, 1, 2, 3] as feature}
       {#if correctQuestions[feature] !== undefined}
         <p>
-          The {positions[feature]} position is {emojis[
+          Their {features[feature]} is {types[feature][
             correctQuestions[feature]
-          ]}
+          ]}.
         </p>
       {:else if incorrectQuestions[feature].length}
         <p>
-          The {positions[feature]} position is not {createString(
+          Their {features[feature]} is not {createString(
+            feature,
             incorrectQuestions[feature]
-          )}
+          )}.
         </p>
       {/if}
     {/each}
@@ -138,8 +143,7 @@
     padding: 12px;
     border: 2px solid #9f86c0;
     border-radius: 3px;
-    height: 120px;
-    overflow: scroll;
+    height: 100%;
   }
 
   p {

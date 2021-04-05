@@ -1,46 +1,40 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { storedCharacters, storedTarget } from "../stores";
+  import { createCharacters, pickTarget } from "../helpers/characters";
+  import {
+    storedCharacters,
+    storedTarget,
+    storedIncorrectGuesses,
+    storedCorrectGuess,
+  } from "../stores";
   import Characters from "./Characters.svelte";
   import Question from "./Question.svelte";
   import Guess from "./Guess.svelte";
+  import Modal from "./Modal.svelte";
 
-  const generateOptions = () => {
-    const options: number[][] = [];
-    const features = [0, 1, 2];
+  let showModal: boolean = true;
 
-    for (const firstFeature of features) {
-      for (const secondFeature of features) {
-        for (const thirdFeature of features) {
-          for (const fourthFeature of features) {
-            options.push([
-              firstFeature,
-              secondFeature,
-              thirdFeature,
-              fourthFeature,
-            ]);
-          }
-        }
-      }
+  let character: number[];
+  let text = "Guess Who?";
+
+  storedIncorrectGuesses.subscribe((guesses) => {
+    const latestGuess = guesses[guesses.length - 1];
+    if (latestGuess && latestGuess.length) {
+      character = latestGuess;
+      text = "It's not";
+      toggleModal();
     }
+  });
 
-    return options;
-  };
+  storedCorrectGuess.subscribe((guess) => {
+    if (guess && guess.length) {
+      character = guess;
+      text = "Well done, it's";
+      toggleModal();
+    }
+  });
 
-  const createCharacters = () => {
-    const options = generateOptions();
-
-    return new Array(18).fill(null).map(() => {
-      const index = Math.floor(Math.random() * options.length);
-      const character = options[index];
-      options.splice(index, 1);
-
-      return character;
-    });
-  };
-
-  export const pickTarget = (characters: number[][]) =>
-    characters[Math.floor(Math.random() * characters.length)];
+  const toggleModal = () => (showModal = !showModal);
 
   onMount(async () => {
     const characters = createCharacters();
@@ -53,6 +47,9 @@
 </script>
 
 <div class="grid">
+  {#if showModal}
+    <Modal handleClick={toggleModal} {text} {character} />
+  {/if}
   <Characters />
   <Question />
   <Guess />

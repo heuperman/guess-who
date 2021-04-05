@@ -1,6 +1,5 @@
 <script lang="ts">
   import {
-    emojis,
     storedCharacters,
     storedCorrectGuess,
     storedCorrectQuestions,
@@ -8,6 +7,7 @@
     storedIncorrectQuestions,
     storedTarget,
   } from "../stores";
+  import Character from "./Character.svelte";
 
   let selectedIndex: number;
   let characters: number[][];
@@ -78,9 +78,6 @@
     selectedIndex = 0;
   });
 
-  const toEmojis = (character: number[]) =>
-    character.map((number) => emojis[number]).join("");
-
   const selectPreviousCharacter = () => {
     if (selectedIndex > 0) {
       selectedIndex -= 1;
@@ -107,9 +104,7 @@
   {#if characters.length}
     <div class="selector">
       <button class="arrow" on:click={selectPreviousCharacter}>{"<"}</button>
-      <div class="character">
-        {toEmojis(selectedCharacter)}
-      </div>
+      <Character character={selectedCharacter} />
       <button class="arrow" on:click={selectNextCharacter}>{">"}</button>
     </div>
     <button class="guess" type="submit" on:click={submitGuess}>Guess</button>
@@ -133,17 +128,6 @@
 
   .selector {
     display: flex;
-  }
-
-  .character {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    background-color: #f5f5f5;
-    border-radius: 3px;
-    height: 160px;
-    width: 120px;
   }
 
   .arrow {
